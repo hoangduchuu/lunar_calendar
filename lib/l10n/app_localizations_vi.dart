@@ -98,7 +98,6 @@ class AppLocalizationsVi extends AppLocalizations {
         'ram_1_thang_5': 'Rằm tháng 5 âm lịch',
         'ram_1_thang_6': 'Rằm tháng 6 âm lịch',
         'ram_1_thang_7': 'Rằm tháng 7 âm lịch',
-        'ram_1_thang_7': 'Rằm tháng 7 âm lịch',
         'ram_1_thang_8': 'Rằm tháng 8 âm lịch',
         'ram_1_thang_9': 'Rằm tháng 9 âm lịch',
         'ram_1_thang_10': 'Rằm tháng 10 âm lịch',

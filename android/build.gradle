@@ -57,10 +57,10 @@ subprojects {
                     }
                 }
                 
-                // Force Kotlin JVM target to 1.8 for compatibility
+                // Force Kotlin JVM target to 17 for compatibility with modern plugins
                 try {
                     project.android.kotlinOptions {
-                        jvmTarget = '1.8'
+                        jvmTarget = '17'
                     }
                 } catch (Exception e) {
                     // Ignore if kotlinOptions doesn't exist
