@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:lunar_calendar/l10n/app_localizations.dart';
 
 import '../../themes/dimens.dart';
 import '../../utils/event_utils.dart';
@@ -19,11 +19,13 @@ class DayEventInfo extends StatelessWidget {
     List<Widget> solarEventItems = List.empty();
     List<Widget> lunarEventItems = List.empty();
 
+    final localizations = AppLocalizations.of(context)!;
+    
     if (isEvent) {
       solarEventItems = List<Widget>.generate(
         solarEvents.length,
             (i) => Text(
-          AppLocalizations.of(context).event(EventUtils.eventDayName(solarEvents[i])),
+          localizations.event(EventUtils.eventDayName(solarEvents[i])),
           style: const TextStyle(fontWeight: FontWeight.w300),
         ),
       );
@@ -31,7 +33,7 @@ class DayEventInfo extends StatelessWidget {
       lunarEventItems = List<Widget>.generate(
         lunarEvents.length,
             (i) => Text(
-          AppLocalizations.of(context).event(EventUtils.eventDayName(lunarEvents[i])),
+          localizations.event(EventUtils.eventDayName(lunarEvents[i])),
           style: const TextStyle(fontWeight: FontWeight.w300),
         ),
       );
@@ -45,7 +47,7 @@ class DayEventInfo extends StatelessWidget {
         ]);
       } else {
         return Text(
-          AppLocalizations.of(context).eventEmpty,
+          localizations.eventEmpty,
           style: const TextStyle(fontWeight: FontWeight.w300),
         );
       }
@@ -59,7 +61,7 @@ class DayEventInfo extends StatelessWidget {
         children: [
           const SizedBox(height: Dimens.mediumPadding),
           Text(
-            AppLocalizations.of(context).eventTitle,
+            localizations.eventTitle,
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: Dimens.smallPadding),

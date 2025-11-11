@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:lunar_calendar/l10n/app_localizations.dart';
 import 'package:lunar_calendar/services/notification/schedule_event.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -10,7 +11,6 @@ import 'package:flutter_timezone/flutter_timezone.dart';
 
 import '../../data/event/event_default_data.dart';
 import '../../utils/event_utils.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../viet_calendar/viet_calendar.dart';
 
@@ -151,16 +151,17 @@ class NotificationService {
     var solarEvents = isEventDay[1];
     var lunarEvents = isEventDay[2];
 
+    final localizations = AppLocalizations.of(context)!;
     var result = '';
     if (solarEvents.isNotEmpty) {
       for (var element in solarEvents) {
-        result += '${AppLocalizations.of(context).event(listDefaultEvent[element].name)}\n';
+        result += '${localizations.event(listDefaultEvent[element].name)}\n';
       }
     }
 
     if (lunarEvents.isNotEmpty) {
       for (var element in lunarEvents) {
-        result += '${AppLocalizations.of(context).event(listDefaultEvent[element].name)}\n';
+        result += '${localizations.event(listDefaultEvent[element].name)}\n';
       }
     }
 

@@ -1,9 +1,7 @@
-import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
+import 'package:sliding_up_panel/sliding_up_panel.dart';
 
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:lunar_calendar/router.dart' as router;
 import 'package:lunar_calendar/services/notification/notification_service.dart';
 import 'package:lunar_calendar/themes/dimens.dart';
 import 'package:lunar_calendar/widgets/table_calendar_lib_custom/calendar_widget.dart';
@@ -11,7 +9,7 @@ import 'package:lunar_calendar/widgets/day_entertainment_info/day_entertainment_
 import 'package:lunar_calendar/widgets/day_info/solar_day_info.dart';
 import 'package:lunar_calendar/widgets/today_icon/today_icon.dart';
 
-import '../services/notification/schedule_event.dart';
+import '../l10n/app_localizations.dart';
 import '../table_calendar_lib/shared/utils.dart';
 import '../themes/colors/light_colors.dart';
 import '../widgets/card_widget.dart';
@@ -34,6 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
   CalendarFormat _calendarFormat = CalendarFormat.month;
 
   final ScrollController _scrollController = ScrollController();
+  final PanelController _panelController = PanelController();
 
   void _onTodayPress() {
     setState(() {
@@ -68,110 +67,119 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  void _onScrollDownListener() {
-    if (_calendarFormat == CalendarFormat.month) {
-      setState(() {
-        _calendarFormat = CalendarFormat.week;
-      });
-    }
-  }
-
-  void _onScrollUpListener() {
-    if (_calendarFormat == CalendarFormat.week) {
-      setState(() {
-        _calendarFormat = CalendarFormat.month;
-      });
-    }
-  }
-
   @override
   void initState() {
     super.initState();
     NotificationService().isAndroidPermissionGranted();
     NotificationService().requestPermissions();
-    // NotificationService().initNotification();
+
+    // Initialize notification after the first frame is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      NotificationService().initNotification(context);
+    });
+  }
+
+  Widget _buildSlidingPanel() {
+    return Container(
+      decoration: BoxDecoration(
+        color: ColorConstants.backgroundColor,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(24.0),
+          topRight: Radius.circular(24.0),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 10,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Drag handle
+          Container(
+            margin: const EdgeInsets.only(top: 12, bottom: 8),
+            width: 40,
+            height: 5,
+            decoration: BoxDecoration(
+              color: Colors.grey[400],
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              padding: const EdgeInsets.all(Dimens.smallPadding),
+              child: Column(children: [
+                CardWidget(
+                  bgColor: ColorConstants.backgroundColor,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      SolarDayInfo(solarDay: _selectedDay),
+                      LunarDayInfo(lunarDay: _selectedDay),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: Dimens.smallPadding),
+                CardWidget(
+                  child: Row(
+                    children: [
+                      Expanded(child: DayEventInfo(day: _selectedDay)),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: Dimens.smallPadding),
+                CardWidget(
+                  minHeight: 200,
+                  child: Row(
+                    children: [
+                      Expanded(child: DayEntertainmentInfo(day: _selectedDay)),
+                    ],
+                  ),
+                ),
+              ]),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _bodyHomeScreen() {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final appBarHeight = AppBar().preferredSize.height;
+    final statusBarHeight = MediaQuery.of(context).padding.top;
+    final availableHeight = screenHeight - appBarHeight - statusBarHeight;
+
     return Container(
       constraints: const BoxConstraints(maxWidth: 700),
       color: ColorConstants.backgroundColor,
-      child: Padding(
-        padding: const EdgeInsets.all(Dimens.smallPadding),
-        child: Column(
-          children: <Widget>[
-            CardWidget(
-              child: CalendarWidget(
-                  today: _selectedDay,
-                  startCalendarDate: _startCalendarDate,
-                  endCalendarDate: _endCalendarDate,
-                  onSelectedDayChange: _onSelectedDateChange,
-                  calendarFormat: _calendarFormat,
-                  onFormatChanged: _onFormatChanged,
-              ),
+      child: SlidingUpPanel(
+        controller: _panelController,
+        minHeight: availableHeight * 0.5, // 50% of screen (half-half)
+        maxHeight: availableHeight * 0.95, // 95% of screen (almost full)
+        defaultPanelState: PanelState.CLOSED, // Start at minHeight (50%)
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(24.0),
+          topRight: Radius.circular(24.0),
+        ),
+        parallaxEnabled: true,
+        parallaxOffset: 0.5,
+        panel: _buildSlidingPanel(),
+        body: Padding(
+          padding: const EdgeInsets.all(Dimens.smallPadding),
+          child: CardWidget(
+            child: CalendarWidget(
+              today: _selectedDay,
+              startCalendarDate: _startCalendarDate,
+              endCalendarDate: _endCalendarDate,
+              onSelectedDayChange: _onSelectedDateChange,
+              calendarFormat: _calendarFormat,
+              onFormatChanged: _onFormatChanged,
             ),
-            Expanded(
-              child: NotificationListener<ScrollNotification>(
-                onNotification: (scrollNotification) {
-                  if (_scrollController.position.userScrollDirection ==
-                          ScrollDirection.reverse
-                      && _scrollController.position.pixels == 0) {
-                    _onScrollDownListener();
-                  } else if (_scrollController.position.userScrollDirection ==
-                          ScrollDirection.forward
-                      && _scrollController.position.pixels == 0) {
-                    _onScrollUpListener();
-                  }
-                  return true;
-                },
-                child: SingleChildScrollView(
-                  controller: _scrollController,
-                  child: Column(children: [
-                    Padding(
-                        padding: const EdgeInsets.only(
-                            right: 0,
-                            left: 0,
-                            bottom: Dimens.smallPadding,
-                            top: Dimens.smallPadding),
-                        child: CardWidget(
-                            // bgImage: 'lib/assets/images/bg_day_info.jpg',
-                          bgColor: ColorConstants.backgroundColor,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                SolarDayInfo(solarDay: _selectedDay),
-                                LunarDayInfo(lunarDay: _selectedDay),
-                              ],
-                            ))),
-                    Padding(
-                        padding: const EdgeInsets.only(
-                            right: 0, left: 0, bottom: Dimens.smallPadding, top: 0),
-                        child: CardWidget(
-                          // bgImage: 'lib/assets/images/bg_day_event.jpg',
-                          child: Row(
-                            children: [
-                              Expanded(child: DayEventInfo(day: _selectedDay)),
-                            ],
-                          ),
-                        )),
-                    Padding(
-                        padding: const EdgeInsets.only(
-                            right: 0, left: 0, bottom: Dimens.smallPadding, top: 0),
-                        child: CardWidget(
-                          minHeight: 200,
-                          // bgImage: 'lib/assets/images/bg_day_event.jpg',
-                          child: Row(
-                            children: [
-                              Expanded(
-                                  child: DayEntertainmentInfo(day: _selectedDay)),
-                            ],
-                          ),
-                        )),
-                  ]),
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -179,29 +187,29 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    NotificationService().initNotification(context);
+    final localizations = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context).homeTitle),
+        title: Text(localizations.homeTitle),
         actions: [
           IconButton(
             icon: TodayIcon(date: _today),
-            tooltip: AppLocalizations.of(context).todayActionDescription,
+            tooltip: localizations.todayActionDescription,
             onPressed: () {
               _onTodayPress();
             },
           ),
           IconButton(
             icon: const Icon(Icons.calendar_month),
-            tooltip: AppLocalizations.of(context).chooseDate,
+            tooltip: localizations.chooseDate,
             onPressed: () {
               _showDatePickerDialog(context);
             },
           ),
           IconButton(
             icon: const Icon(Icons.settings),
-            tooltip: AppLocalizations.of(context).settingActionDescription,
+            tooltip: localizations.settingActionDescription,
             onPressed: () async {
               // Navigator.pushNamed(context, router.settingScreen);
 

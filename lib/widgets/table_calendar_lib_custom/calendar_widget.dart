@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../../l10n/app_localizations.dart';
 import '../../table_calendar_lib/shared/utils.dart';
 import '../../utils/calendar_page_utils.dart';
 import 'table_calendar_customize.dart';
@@ -78,9 +78,10 @@ class _CalendarWidgetState extends State<CalendarWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     _availableCalendarFormats ??= {
-        CalendarFormat.month: AppLocalizations.of(context).monthCalendarFormat,
-        CalendarFormat.week: AppLocalizations.of(context).weekCalendarFormat,
+        CalendarFormat.month: localizations.monthCalendarFormat,
+        CalendarFormat.week: localizations.weekCalendarFormat,
       };
 
     return TableCalendarCustom(

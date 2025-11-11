@@ -9,7 +9,7 @@ import flutter_local_notifications
 import flutter_native_timezone
 import flutter_timezone
 import path_provider_foundation
-import sqflite
+import sqflite_darwin
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   FlutterLocalNotificationsPlugin.register(with: registry.registrar(forPlugin: "FlutterLocalNotificationsPlugin"))
