@@ -35,7 +35,8 @@ migrate_working_dir/
 /build/
 
 # FVM
-.fvm/flutter_sdk
+.fvm/
+.fvmrc
 
 # Symbolication related
 app.*.symbols
